@@ -16,6 +16,7 @@ public interface CursoService {
 
     Optional<Usuario> eliminarUsuario(Long idUsuario, Long idCurso);
 
+    Optional<Curso> findByNombre(String nombre);
 }
 
 

@@ -25,6 +25,27 @@ public class UsuarioController {
         return service.listar();
     }
 
+    @GetMapping("nombre/{name}")
+    public ResponseEntity<Usuario> buscarPorName(@PathVariable String name) {
+        Optional<Usuario> usuarioOptional = service.buscarPorNombre(name);
+        if (usuarioOptional.isPresent()) {
+            return new ResponseEntity<>(usuarioOptional.get(), HttpStatus.OK);
+
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    @GetMapping("email/{email}")
+    public ResponseEntity<Usuario> buscarPorEmail(@PathVariable String email) {
+        Optional<Usuario>usuarioOptional = service.porEmail(email);
+            if (usuarioOptional.isPresent()) {
+                return new ResponseEntity<>(usuarioOptional.get(), HttpStatus.OK);
+
+            }
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> detalle(@PathVariable Long id) {
         Optional<Usuario> usuarioOptional = service.porId(id);

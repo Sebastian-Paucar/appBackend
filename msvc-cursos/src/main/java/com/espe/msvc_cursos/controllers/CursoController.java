@@ -25,6 +25,8 @@ public class CursoController {
         return service.listar();
     }
 
+
+
     @GetMapping("/{id}")
     public ResponseEntity<?> detalle(@PathVariable Long id) {
         Optional<Curso> cursoOptional = service.porId(id);
@@ -39,8 +41,16 @@ public class CursoController {
         if (result.hasErrors()) {
             return validar(result);
         }
+
+        // Verificar si ya existe un curso con el mismo nombre (u otro atributo único)
+        Optional<Curso> cursoExistente = service.findByNombre(curso.getNombre());
+        if (cursoExistente.isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El curso ya existe");
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(curso));
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@Valid @RequestBody Curso curso, BindingResult result, @PathVariable Long id) {

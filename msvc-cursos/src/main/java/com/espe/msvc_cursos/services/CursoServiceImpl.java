@@ -85,6 +85,11 @@ public class CursoServiceImpl implements CursoService {
         return Optional.empty();
     }
 
+    @Override
+    public Optional<Curso> findByNombre(String nombre) {
+        return repository.findByNombre(nombre);
+    }
+
 
 
 }
