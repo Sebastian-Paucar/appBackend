@@ -1,0 +1,58 @@
+
+services:
+  postgres:
+    image: deeepmind404/custom-postgres:latest
+    container_name: postgres
+    ports:
+      - "5434:5432"
+    networks:
+      - app-network
+
+  mysql:
+    image: deeepmind404/custom-mysql:latest
+    container_name: mysql
+    ports:
+      - "3310:3306"
+    networks:
+      - app-network
+
+  msvc-cursos:
+    image: deeepmind404/msvc-cursos:latest
+    container_name: msvc-cursos
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/appdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ESPE2024
+    ports:
+      - "8002:8002"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  msvc-usuarios:
+    image: deeepmind404/msvc-usuarios:latest
+    container_name: msvc-usuarios
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/appdb
+      SPRING_DATASOURCE_USERNAME: rootAdmin
+      SPRING_DATASOURCE_PASSWORD: 12345678
+    ports:
+      - "8001:8001"
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  frontend:
+    image: deeepmind404/frontend:latest
+    container_name: frontend
+
+    ports:
+      - "4200:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
