@@ -30,13 +30,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Usuario> listar(){
+    public List<Usuario> listar() {
         return (List<Usuario>) usuarioRepository.findAll();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Usuario> porId(Long id){
+    public Optional<Usuario> porId(Long id) {
         return usuarioRepository.findById(id);
     }
 
@@ -48,9 +48,11 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     @Transactional
-    public Usuario guardar(Usuario usuario){
-        // Encriptamos la contraseña antes de guardar
-        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+    public Usuario guardar(Usuario usuario) {
+        // Encriptamos la contraseña antes de guardar si es nueva o ha sido modificada
+        if (usuario.getPassword() != null) {
+            usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        }
 
         // Guardamos los roles si no existen
         Set<Role> rolesGuardados = new HashSet<>();
@@ -68,15 +70,49 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-
     @Override
     @Transactional
-    public void eliminar(Long id){
+    public void eliminar(Long id) {
         usuarioRepository.deleteById(id);
     }
 
     @Override
+    @Transactional
     public Optional<Usuario> buscarPorNombre(String nombre) {
         return usuarioRepository.findByNombre(nombre);
+    }
+
+    @Override
+    @Transactional
+    public Usuario actualizar(Long id, Usuario usuarioActualizado) {
+        Optional<Usuario> usuarioExistente = usuarioRepository.findById(id);
+
+        if (usuarioExistente.isPresent()) {
+            Usuario usuario = usuarioExistente.get();
+
+            usuario.setNombre(usuarioActualizado.getNombre());
+            usuario.setEmail(usuarioActualizado.getEmail());
+
+            // Encriptamos la nueva contraseña si se ha proporcionado
+            if (usuarioActualizado.getPassword() != null) {
+                usuario.setPassword(passwordEncoder.encode(usuarioActualizado.getPassword()));
+            }
+
+            // Actualizamos los roles
+            Set<Role> rolesGuardados = new HashSet<>();
+            for (Role role : usuarioActualizado.getRoles()) {
+                Optional<Role> roleExistente = roleRepository.findByRole(role.getRole());
+                if (roleExistente.isEmpty()) {
+                    rolesGuardados.add(roleRepository.save(role));
+                } else {
+                    rolesGuardados.add(roleExistente.get());
+                }
+            }
+            usuario.setRoles(rolesGuardados);
+
+            return usuarioRepository.save(usuario);
+        }
+
+        return null;  // o lanza una excepción si el usuario no existe
     }
 }
