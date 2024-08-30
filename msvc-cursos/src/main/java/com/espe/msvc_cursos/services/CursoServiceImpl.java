@@ -46,11 +46,28 @@ public class CursoServiceImpl implements CursoService {
 
 
     @Override
-    public Optional<Usuario> agregarUsuario(Usuario usuario, Long idCurso){
+    public Optional<Usuario> agregarUsuario(Usuario usuario, Long idCurso, String token){
         Optional<Curso> o =repository.findById(idCurso);
         if(o.isPresent()){
-            Usuario usuarioMicro = usuarioClientRest.detalle(usuario.getId());
+            Usuario usuarioMicro = usuarioClientRest.detalle(usuario.getId(), token);
+            System.out.println(usuarioMicro);
+            Curso curso= o.get();
+            CursoUsuario cursoUsuario = new CursoUsuario();
+            cursoUsuario.setUsuarioId(usuarioMicro.getId());
 
+            curso.addCursoUsuario(cursoUsuario);
+            repository.save(curso);
+            return Optional.of(usuarioMicro);
+
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Usuario> agregarUsuarioConToken(Usuario usuario, Long idcurso, String token) {
+        Optional<Curso> o =repository.findById(idcurso);
+        if(o.isPresent()){
+            Usuario usuarioMicro = usuarioClientRest.detalle(usuario.getId(), token);
+            System.out.println(usuarioMicro);
             Curso curso= o.get();
             CursoUsuario cursoUsuario = new CursoUsuario();
             cursoUsuario.setUsuarioId(usuarioMicro.getId());
@@ -64,12 +81,11 @@ public class CursoServiceImpl implements CursoService {
     }
 
 
-
     @Override
-    public Optional<Usuario> eliminarUsuario(Long idusuario, Long idCurso) {
+    public Optional<Usuario> eliminarUsuario(Long idusuario, Long idCurso, String token) {
         Optional<Curso> cursoOptional = repository.findById(idCurso);
         if (cursoOptional.isPresent()) {
-            Usuario usuarioMicro = usuarioClientRest.detalle(idusuario);
+            Usuario usuarioMicro = usuarioClientRest.detalle(idusuario, token);
             if (usuarioMicro != null) {
                 Curso curso = cursoOptional.get();
                 CursoUsuario cursoUsuario = new CursoUsuario();

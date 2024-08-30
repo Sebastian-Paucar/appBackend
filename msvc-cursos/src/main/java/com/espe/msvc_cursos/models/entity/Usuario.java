@@ -1,24 +1,26 @@
 package com.espe.msvc_cursos.models.entity;
 
+import java.util.Set;
+
 public class Usuario {
-    private Long id;
+    private long id;
     private String nombre;
     private String email;
     private String password;
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
-    public void setId(Long id) {
+
+    public void setId(int id) {
         this.id = id;
     }
-    public String getNombre() {
-        return nombre;
-    }
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-    public String getEmail() {
-        return email;
-    }
+
+    private Set<Role> roles;
+    private boolean accountNonExpired;
+    private boolean accountNonLocked;
+    private boolean credentialsNonExpired;
+    private boolean enabled;
+
+
 }

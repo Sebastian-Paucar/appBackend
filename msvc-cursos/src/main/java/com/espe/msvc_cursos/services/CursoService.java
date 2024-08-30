@@ -12,11 +12,13 @@ public interface CursoService {
     Curso guardar(Curso curso);
     void eliminar(Long id);
 
-    Optional<Usuario> agregarUsuario(Usuario usuario, Long idCurso);
+    Optional<Usuario> agregarUsuario(Usuario usuario, Long idCurso, String token);
 
-    Optional<Usuario> eliminarUsuario(Long idUsuario, Long idCurso);
+    Optional<Usuario> eliminarUsuario(Long idUsuario, Long idCurso, String token);
 
     Optional<Curso> findByNombre(String nombre);
+
+    Optional<Usuario> agregarUsuarioConToken(Usuario usuario, Long idcurso, String accessToken);
 }
 
 
