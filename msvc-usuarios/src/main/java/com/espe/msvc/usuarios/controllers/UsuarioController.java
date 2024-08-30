@@ -1,6 +1,8 @@
 package com.espe.msvc.usuarios.controllers;
 
+import com.espe.msvc.usuarios.models.entity.Role;
 import com.espe.msvc.usuarios.models.entity.Usuario;
+import com.espe.msvc.usuarios.services.RoleService;
 import com.espe.msvc.usuarios.services.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +23,15 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService service;
+    @Autowired
+    private RoleService roleService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public List<Usuario> listar() {
         return service.listar();
     }
-
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @GetMapping("nombre/{name}")
     public ResponseEntity<Usuario> buscarPorName(@PathVariable String name) {
         Optional<Usuario> usuarioOptional = service.buscarPorNombre(name);
@@ -45,7 +49,7 @@ public class UsuarioController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<?> detalle(@PathVariable Long id) {
         Optional<Usuario> usuarioOptional = service.porId(id);
@@ -54,7 +58,6 @@ public class UsuarioController {
         }
         return ResponseEntity.notFound().build();
     }
-
     @PostMapping
     public ResponseEntity<?> crear(@Valid @RequestBody Usuario usuario, BindingResult result) {
         if (result.hasErrors()) {
@@ -63,6 +66,7 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(usuario));
     }
 
+
     private static ResponseEntity<Map<String, String>> validar(BindingResult result) {
         Map<String, String> errores = new HashMap<>();
         result.getFieldErrors().forEach(error -> {
@@ -70,7 +74,7 @@ public class UsuarioController {
         });
         return ResponseEntity.badRequest().body(errores);
     }
-
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@Valid @RequestBody Usuario usuario, BindingResult result, @PathVariable Long id) {
         if (result.hasErrors()) {
@@ -85,6 +89,13 @@ public class UsuarioController {
     }
 
 
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+        @GetMapping("/roles")
+        public ResponseEntity<List<Role>> getAllRoles() {
+            List<Role> roles = roleService.getAllRoles();
+            return ResponseEntity.ok(roles);
+        }
+    @PreAuthorize("hasAuthority( 'ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         Optional<Usuario> optionalUsuario = service.porId(id);

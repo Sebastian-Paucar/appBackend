@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,14 +20,14 @@ public class CursoController {
 
     @Autowired
     private CursoService service;
-
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @GetMapping
     public List<Curso> listar() {
         return service.listar();
     }
 
 
-
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<?> detalle(@PathVariable Long id) {
         Optional<Curso> cursoOptional = service.porId(id);
@@ -35,7 +36,7 @@ public class CursoController {
         }
         return ResponseEntity.notFound().build();
     }
-
+    @PreAuthorize("hasAuthority( 'ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<?> crear(@Valid @RequestBody Curso curso, BindingResult result) {
         if (result.hasErrors()) {
@@ -51,7 +52,7 @@ public class CursoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(curso));
     }
 
-
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@Valid @RequestBody Curso curso, BindingResult result, @PathVariable Long id) {
         if (result.hasErrors()) {
@@ -65,7 +66,7 @@ public class CursoController {
         }
         return ResponseEntity.notFound().build();
     }
-
+    @PreAuthorize("hasAuthority( 'ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         Optional<Curso> cursoOptional = service.porId(id);
@@ -83,7 +84,7 @@ public class CursoController {
         });
         return ResponseEntity.badRequest().body(errores);
     }
-
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @PutMapping("/asignar-usuario/{idcurso}")
     public ResponseEntity<?> asignarUsuario(@RequestBody Usuario usuario, @PathVariable Long idcurso) {
         Optional<Usuario> o;
@@ -105,7 +106,7 @@ public class CursoController {
                     .body(Collections.singletonMap("mensaje", "El usuario no fue encontrado o no pudo ser asignado al curso."));
         }
     }
-
+    @PreAuthorize("hasAuthority( 'ROLE_ADMIN')")
     @DeleteMapping("/eliminar-usuario/{idcurso}")
     public ResponseEntity<?> eliminarUsuario(@RequestParam Long usuarioId, @PathVariable Long idcurso) {
         try {

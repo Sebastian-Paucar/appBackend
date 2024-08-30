@@ -6,16 +6,15 @@ import com.espe.msvc.usuarios.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+
+import java.util.List;
+
 @Service
 public class RoleService {
-    private final RoleRepository roleRepository;
     @Autowired
-    public RoleService(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
+    private RoleRepository roleRepository;
 
-    public Optional<Role> findRole(RoleName roleName) {
-        return roleRepository.findByRole(roleName);
+    public List<Role> getAllRoles() {
+        return (List<Role>) roleRepository.findAll();
     }
 }

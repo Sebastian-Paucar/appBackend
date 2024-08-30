@@ -1,10 +1,23 @@
-
 services:
+  frontend:
+    build:
+      context: ./Front
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./Front/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./Front/public:/usr/share/nginx/html/public:ro
+    networks:
+      - app-network
+
   postgres:
     image: deeepmind404/custom-postgres:latest
     container_name: postgres
     ports:
       - "5434:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data  # Monta el volumen para persistir datos
     networks:
       - app-network
 
@@ -13,11 +26,43 @@ services:
     container_name: mysql
     ports:
       - "3310:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql  # Monta el volumen para persistir datos
+    networks:
+      - app-network
+
+  security-service:
+    build:
+      context: ./security
+      dockerfile: Dockerfile
+    container_name: security-service
+    ports:
+      - "9000:9000"
+    networks:
+      - app-network
+
+  msvc-usuarios:
+    build:
+      context: ./msvc-usuarios
+      dockerfile: Dockerfile
+    container_name: msvc-usuarios
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/appdb
+      SPRING_DATASOURCE_USERNAME: rootAdmin
+      SPRING_DATASOURCE_PASSWORD: 12345678
+
+    ports:
+      - "8001:8001"
+    depends_on:
+      - security-service
+      - mysql
     networks:
       - app-network
 
   msvc-cursos:
-    image: deeepmind404/msvc-cursos:latest
+    build:
+      context: ./msvc-cursos
+      dockerfile: Dockerfile
     container_name: msvc-cursos
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/appdb
@@ -26,33 +71,17 @@ services:
     ports:
       - "8002:8002"
     depends_on:
+      - security-service
       - postgres
-    networks:
-      - app-network
-
-  msvc-usuarios:
-    image: deeepmind404/msvc-usuarios:latest
-    container_name: msvc-usuarios
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/appdb
-      SPRING_DATASOURCE_USERNAME: rootAdmin
-      SPRING_DATASOURCE_PASSWORD: 12345678
-    ports:
-      - "8001:8001"
-    depends_on:
-      - mysql
-    networks:
-      - app-network
-
-  frontend:
-    image: deeepmind404/frontend:latest
-    container_name: frontend
-
-    ports:
-      - "4200:80"
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
+  mysql-data:
+    driver: local
